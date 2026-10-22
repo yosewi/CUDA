@@ -1,0 +1,11 @@
+Use CUDA Template sample to write a program which calculates a sum of elements in given array.
+
+Try with the following assumptions:
+
+    Array size <= 1024 elements
+
+    Threads use shared memory
+
+    Aray size > 1024 and multiple blocks of threads are used
+        asure coalescing memory access
+        asure no shared memory banks conflicts
