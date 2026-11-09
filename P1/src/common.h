@@ -19,4 +19,11 @@ struct Options {
     const char* outputPath;
 };
 
+struct Dataset {
+    int N;
+    int d; 
+    int k;
+    double* points;
+};
+
 #endif

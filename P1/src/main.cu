@@ -2,6 +2,19 @@
 #include <string.h>
 
 #include "common.h"
+#include "io.h"
+
+static void printUsage(const char* programName)
+{
+    printf("Uzycie:\n");
+    printf("    %s data_format computation_method input_file output_file\n\n", programName);
+    printf("    data_format:        txt | bin\n");
+    printf("    computation_method: gpu1 | gpu2 | cpu\n");
+    printf("    input_file:         sciezka do pliku z danymi\n");
+    printf("    output_file:        sciezka do pliku z wynikami\n\n");
+    printf("Przyklad:\n");
+    printf("    %s bin gpu1 dane.bin wynik.txt\n", programName);
+}
 
 static int parseFormat(const char* text, DataFormat* format)
 {
@@ -66,5 +79,29 @@ int main(int argc, char** argv)
     printf("Plik wejsciowy: %s\n", options.inputPath);
     printf("Plik wynikowy:  %s\n", options.outputPath);
 
+    Dataset data;
+    if (options.format == FORMAT_TXT) {
+        if (!readTxt(options.inputPath, &data)) {
+            return 1;
+        }
+    } else {
+        printf("Format bin jeszcze nie jest obslugiwany.\n");
+        return 1;
+    }
+
+    printf("Liczba punktow N: %d\n", data.N);
+    printf("Wymiary d:        %d\n", data.d);
+    printf("Klastry k:        %d\n", data.k);
+
+    int shown = data.N < 3 ? data.N : 3;
+    for (int i = 0; i < shown; i++) {
+        printf("Punkt %d:", i);
+        for (int j = 0; j < data.d; j++) {
+            printf(" %g", data.points[(size_t)j * data.N + i]);
+        }
+        printf("\n");
+    }
+
+    freeDataset(&data);
     return 0;
 }
