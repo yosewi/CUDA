@@ -80,12 +80,13 @@ int main(int argc, char** argv)
     printf("Plik wynikowy:  %s\n", options.outputPath);
 
     Dataset data;
+    int loaded;
     if (options.format == FORMAT_TXT) {
-        if (!readTxt(options.inputPath, &data)) {
-            return 1;
-        }
+        loaded = readTxt(options.inputPath, &data);
     } else {
-        printf("Format bin jeszcze nie jest obslugiwany.\n");
+        loaded = readBin(options.inputPath, &data);
+    }
+    if (!loaded) {
         return 1;
     }
 

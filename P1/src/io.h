@@ -5,6 +5,8 @@
 
 int readTxt(const char* path, Dataset* data);
 
+int readBin(const char* path, Dataset* data);
+
 void freeDataset(Dataset* data);
 
 #endif
