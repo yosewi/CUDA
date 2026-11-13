@@ -1,8 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "common.h"
 #include "io.h"
+#include "kmeans_cpu.h"
 
 static void printUsage(const char* programName)
 {
@@ -94,15 +96,37 @@ int main(int argc, char** argv)
     printf("Wymiary d:        %d\n", data.d);
     printf("Klastry k:        %d\n", data.k);
 
-    int shown = data.N < 3 ? data.N : 3;
-    for (int i = 0; i < shown; i++) {
-        printf("Punkt %d:", i);
+    if (options.method != METHOD_CPU) {
+        printf("Metoda %s jeszcze nie jest obslugiwana.\n", methodName(options.method));
+        freeDataset(&data);
+        return 1;
+    }
+
+    // Centroidy: k * d liczb (SoA, jak punkty). Etykiety: numer klastra kazdego punktu.
+    double* centroids = (double*)malloc((size_t)data.k * data.d * sizeof(double));
+    int*    labels    = (int*)malloc((size_t)data.N * sizeof(int));
+    if (centroids == NULL || labels == NULL) {
+        printf("Blad: brak pamieci na centroidy lub etykiety.\n");
+        free(centroids);
+        free(labels);
+        freeDataset(&data);
+        return 1;
+    }
+
+    int iterations = kmeansCpu(&data, centroids, labels);
+    printf("Koniec po %d iteracjach.\n", iterations);
+
+    // TYMCZASOWO: podglad wyniku. W nastepnym kroku zastapi to zapis do pliku.
+    for (int c = 0; c < data.k; c++) {
+        printf("Centroid %d:", c);
         for (int j = 0; j < data.d; j++) {
-            printf(" %g", data.points[(size_t)j * data.N + i]);
+            printf(" %g", centroids[j * data.k + c]);
         }
         printf("\n");
     }
 
+    free(centroids);
+    free(labels);
     freeDataset(&data);
     return 0;
 }
