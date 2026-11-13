@@ -1,3 +1,4 @@
 KMeans
 KMeans.exe
 *.o
+data/test*

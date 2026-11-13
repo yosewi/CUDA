@@ -6,6 +6,7 @@
 #include "common.h"
 #include "io.h"
 #include "kmeans_cpu.h"
+#include "kmeans_gpu1.h"
 
 static void printUsage(const char* programName)
 {
@@ -81,7 +82,7 @@ int main(int argc, char** argv)
     printf("Plik wejsciowy: %s\n", options.inputPath);
     printf("Plik wynikowy:  %s\n", options.outputPath);
 
-    if (options.method != METHOD_CPU) {
+    if (options.method == METHOD_GPU2) {
         printf("Metoda %s jeszcze nie jest obslugiwana.\n", methodName(options.method));
         return 1;
     }
@@ -119,7 +120,17 @@ int main(int argc, char** argv)
     printf("\n[2/3] Obliczenia (%s)\n", methodName(options.method));
     timer.start();
 
-    int iterations = kmeansCpu(&data, centroids, labels);
+    int iterations = 0;
+    if (options.method == METHOD_CPU) {
+        iterations = kmeansCpu(&data, centroids, labels);
+    } else {
+        if (!kmeansGpu1(&data, centroids, labels, &iterations)) {
+            free(centroids);
+            free(labels);
+            freeDataset(&data);
+            return 1;
+        }
+    }
 
     printf("Koniec po %d iteracjach.\n", iterations);
     printf("Czas obliczen: %.1f ms\n", timer.stopMs());
