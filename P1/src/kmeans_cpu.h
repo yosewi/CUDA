@@ -3,10 +3,7 @@
 
 #include "common.h"
 
-// Centroidy maja ten sam uklad SoA co punkty, tylko zamiast N jest k:
-// wspolrzedna j centroidu c to centroids[j * k + c]  (k * d liczb).
-
-// Ustawia centroidy startowe: pierwsze k punktow z danych (wymog specyfikacji).
+// Ustawia centroidy startowe: pierwsze k punktow z danych
 void initCentroids(const Dataset* data, double* centroids);
 
 // Przypisuje kazdy punkt do najblizszego centroidu (zapisuje numer w labels).

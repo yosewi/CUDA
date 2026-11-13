@@ -140,6 +140,45 @@ int readBin(const char* path, Dataset* data)
     return 1;
 }
 
+int writeResult(const char* path, const Dataset* data, const double* centroids, const int* labels)
+{
+    const int N = data->N;
+    const int d = data->d;
+    const int k = data->k;
+
+    FILE* file = fopen(path, "w");
+    if (file == NULL) {
+        printf("Blad: nie mozna utworzyc pliku \"%s\".\n", path);
+        return 0;
+    }
+
+    for (int c = 0; c < k; c++) {
+        for (int j = 0; j < d; j++) {
+            fprintf(file, j == 0 ? "%.4f" : " %.4f", centroids[j * k + c]);
+        }
+        fprintf(file, "\n");
+    }
+
+    int step = N / 10;
+    if (step == 0) step = 1;
+
+    for (int i = 0; i < N; i++) {
+        fprintf(file, "%d\n", labels[i]);
+
+        if ((i + 1) % step == 0 || i + 1 == N) {
+            printf("\rZapis: %3d%%", (int)((i + 1) * 100LL / N));
+            fflush(stdout);
+        }
+    }
+    printf("\n");
+
+    if (fclose(file) != 0) {
+        printf("Blad: nie udalo sie zapisac pliku \"%s\".\n", path);
+        return 0;
+    }
+    return 1;
+}
+
 void freeDataset(Dataset* data)
 {
     free(data->points);

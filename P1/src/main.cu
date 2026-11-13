@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "timer.h"
 #include "common.h"
 #include "io.h"
 #include "kmeans_cpu.h"
@@ -76,10 +77,19 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    printf("Format danych:  %s\n", formatName(options.format));
     printf("Metoda:         %s\n", methodName(options.method));
     printf("Plik wejsciowy: %s\n", options.inputPath);
     printf("Plik wynikowy:  %s\n", options.outputPath);
+
+    if (options.method != METHOD_CPU) {
+        printf("Metoda %s jeszcze nie jest obslugiwana.\n", methodName(options.method));
+        return 1;
+    }
+
+    Timer timer;
+
+    printf("\n[1/3] Wczytywanie danych (format %s)\n", formatName(options.format));
+    timer.start();
 
     Dataset data;
     int loaded;
@@ -92,15 +102,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    printf("Liczba punktow N: %d\n", data.N);
-    printf("Wymiary d:        %d\n", data.d);
-    printf("Klastry k:        %d\n", data.k);
-
-    if (options.method != METHOD_CPU) {
-        printf("Metoda %s jeszcze nie jest obslugiwana.\n", methodName(options.method));
-        freeDataset(&data);
-        return 1;
-    }
+    printf("Czas wczytywania: %.1f ms\n", timer.stopMs());
+    printf("Dane: N = %d punktow, d = %d wymiarow, k = %d klastrow\n", data.N, data.d, data.k);
 
     // Centroidy: k * d liczb (SoA, jak punkty). Etykiety: numer klastra kazdego punktu.
     double* centroids = (double*)malloc((size_t)data.k * data.d * sizeof(double));
@@ -113,20 +116,24 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    int iterations = kmeansCpu(&data, centroids, labels);
-    printf("Koniec po %d iteracjach.\n", iterations);
+    printf("\n[2/3] Obliczenia (%s)\n", methodName(options.method));
+    timer.start();
 
-    // TYMCZASOWO: podglad wyniku. W nastepnym kroku zastapi to zapis do pliku.
-    for (int c = 0; c < data.k; c++) {
-        printf("Centroid %d:", c);
-        for (int j = 0; j < data.d; j++) {
-            printf(" %g", centroids[j * data.k + c]);
-        }
-        printf("\n");
+    int iterations = kmeansCpu(&data, centroids, labels);
+
+    printf("Koniec po %d iteracjach.\n", iterations);
+    printf("Czas obliczen: %.1f ms\n", timer.stopMs());
+
+    printf("\n[3/3] Zapis wynikow do pliku %s\n", options.outputPath);
+    timer.start();
+
+    int saved = writeResult(options.outputPath, &data, centroids, labels);
+    if (saved) {
+        printf("Czas zapisu: %.1f ms\n", timer.stopMs());
     }
 
     free(centroids);
     free(labels);
     freeDataset(&data);
-    return 0;
+    return saved ? 0 : 1;
 }

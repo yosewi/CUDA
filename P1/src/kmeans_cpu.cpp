@@ -10,7 +10,6 @@ void initCentroids(const Dataset* data, double* centroids)
     const int d = data->d;
     const int k = data->k;
 
-    // Centroid c = punkt c (dla c = 0 .. k-1), przepisany wspolrzedna po wspolrzednej.
     for (int c = 0; c < k; c++) {
         for (int j = 0; j < d; j++) {
             centroids[j * k + c] = data->points[(size_t)j * N + c];
@@ -32,15 +31,14 @@ int assignPoints(const Dataset* data, const double* centroids, int* labels)
         double bestDist = DBL_MAX;
 
         for (int c = 0; c < k; c++) {
-            // Kwadrat odleglosci: pierwiastek nie jest potrzebny,
-            // bo najmniejszy kwadrat ma ten sam centroid co najmniejsza odleglosc.
+            // Kwadrat odleglosci
             double dist = 0.0;
             for (int j = 0; j < d; j++) {
                 double diff = data->points[(size_t)j * N + i] - centroids[j * k + c];
                 dist += diff * diff;
             }
 
-            // Scisle "<": przy remisie wygrywa centroid o mniejszym numerze.
+            // przy remisie wygrywa centroid o mniejszym numerze.
             if (dist < bestDist) {
                 bestDist = dist;
                 best     = c;
@@ -62,8 +60,6 @@ void updateCentroids(const Dataset* data, const int* labels, double* centroids)
     const int d = data->d;
     const int k = data->k;
 
-    // Sumy wspolrzednych i licznosci klastrow. k i d sa najwyzej 20,
-    // wiec wystarcza male tablice na stosie (uklad jak centroidy: [j * k + c]).
     double sums[MAX_DIM * MAX_K] = {0.0};
     int    counts[MAX_K]         = {0};
 
@@ -77,7 +73,6 @@ void updateCentroids(const Dataset* data, const int* labels, double* centroids)
     }
 
     // 2. Nowy centroid = suma / licznosc. Pusty klaster zostaje bez zmian
-    //    (dzielenie przez 0 daloby NaN).
     for (int c = 0; c < k; c++) {
         if (counts[c] == 0) {
             continue;
@@ -107,7 +102,6 @@ int kmeansCpu(const Dataset* data, double* centroids, int* labels)
 
         printf("Iteracja %3d: zmienilo klaster %d punktow\n", iteration, changed);
 
-        // Warunek stopu ze specyfikacji: zaden punkt nie zmienil klastra.
         if (changed == 0) {
             break;
         }
