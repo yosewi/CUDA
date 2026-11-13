@@ -1,6 +1,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+// Ograniczenia ze specyfikacji.
+#define MAX_DIM        20    // d = 1 .. 20
+#define MAX_K          20    // k = 2 .. 20
+#define MAX_ITERATIONS 100   // limit iteracji algorytmu
+
 enum DataFormat {
     FORMAT_TXT,
     FORMAT_BIN

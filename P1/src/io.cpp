@@ -6,8 +6,8 @@
 static int checkHeader(int N, int d, int k)
 {
     if (N < 1)            { printf("Blad: liczba punktow N = %d musi byc >= 1.\n", N); return 0; }
-    if (d < 1 || d > 20)  { printf("Blad: liczba wymiarow d = %d spoza zakresu 1-20.\n", d); return 0; }
-    if (k < 2 || k > 20)  { printf("Blad: liczba klastrow k = %d spoza zakresu 2-20.\n", k); return 0; }
+    if (d < 1 || d > MAX_DIM) { printf("Blad: liczba wymiarow d = %d spoza zakresu 1-%d.\n", d, MAX_DIM); return 0; }
+    if (k < 2 || k > MAX_K)   { printf("Blad: liczba klastrow k = %d spoza zakresu 2-%d.\n", k, MAX_K); return 0; }
     if (k > N)            { printf("Blad: klastrow (k = %d) jest wiecej niz punktow (N = %d).\n", k, N); return 0; }
     return 1;
 }
@@ -123,7 +123,6 @@ int readBin(const char* path, Dataset* data)
             fclose(file);
             return 0;
         }
-                           -> SoA.
         for (int p = 0; p < count; p++) {
             int i = first + p;
             for (int j = 0; j < d; j++) {
